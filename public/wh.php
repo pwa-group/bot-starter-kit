@@ -81,6 +81,7 @@ try {
                     (new \App\Controllers\Index)($id, $bot);
                     break;
             }
+            $bot->deleteMessage($id, $message->getMessageId());
         }
     }, function () {
         return true;
