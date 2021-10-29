@@ -1,38 +1,44 @@
 <?php
+
+use App\Dictionary;
+use TelegramBot\Api\BotApi;
+
 require_once('..' . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php');
 $webhookURL = 'https://' . $_SERVER['HTTP_HOST'] . '/wh.php';
-if (!file_exists(\App\Dictionary::CACHE_PATH)) {
-    mkdir(\App\Dictionary::CACHE_PATH);
+if (!file_exists(Dictionary::CACHE_PATH)) {
+    mkdir(Dictionary::CACHE_PATH);
 }
-$config = ['api' => '', 'bot' => ''];
+Dictionary::config()->set(['api' => '', 'bot' => '']);
 $files = ['banner' => 'Основной баннер', 'fbpb' => 'Баннер для Facebook Pixel', 'pwab' => 'Баннер для PWA'];
-if (file_exists(\App\Dictionary::CONFIG_PATH)) {
-    $config = require_once \App\Dictionary::CONFIG_PATH;
+if (file_exists(Dictionary::CONFIG_PATH)) {
+    Dictionary::config()->init();
     if (!empty($_POST)) {
-        $config['api'] = $_POST['api'];
-        $config['bot'] = $_POST['bot'];
+        Dictionary::config()->set($_POST['api'], 'api');
+        Dictionary::config()->set($_POST['bot'], 'bot');
         foreach ($files as $file => $label) {
             if (isset($_FILES[$file]['tmp_name']) && $_FILES[$file]['tmp_name'] != '') {
-                $target_file = \App\Dictionary::CACHE_PATH . DIRECTORY_SEPARATOR . basename($_FILES[$file]['name']);
+                $target_file = Dictionary::CACHE_PATH . DIRECTORY_SEPARATOR . basename($_FILES[$file]['name']);
                 if (move_uploaded_file($_FILES[$file]['tmp_name'], $target_file)) {
-                    if (file_exists($config[$file])) {
-                        unlink($config[$file]);
+                    if (file_exists(Dictionary::config()->get($file))) {
+                        unlink(Dictionary::config()->get($file));
                     }
-                    $config[$file] = $target_file;
+                    Dictionary::config()->set($file, $target_file);
                 }
             }
         }
-        file_put_contents(\App\Dictionary::CONFIG_PATH, '<?php return ' . var_export($config, true) . ';');
-        $bot = new \TelegramBot\Api\BotApi($config['bot']);
+        Dictionary::config()->save();
+        $bot = new BotApi(Dictionary::config()->get('bot'));
         try {
             $bot->setWebhook($webhookURL);
         } catch (\TelegramBot\Api\Exception $e) {
         }
     }
 } else {
-    copy(\App\Dictionary::TEMPLATE_CONFIG_PATH, \App\Dictionary::CONFIG_PATH);
+    copy(Dictionary::TEMPLATE_CONFIG_PATH, Dictionary::CONFIG_PATH);
 }
-$bot = new \TelegramBot\Api\BotApi($config['bot']);
+$bot = new BotApi(
+    Dictionary::config()->get('bot')
+);
 try {
     $botWebhookURL = $bot->getWebhookInfo()->getUrl();
 } catch (\TelegramBot\Api\Exception $e) {
@@ -47,22 +53,22 @@ $requirements = [
     [
         'name' => 'Доступ на запись',
         'description' => 'Необходимо для кеширования',
-        'condition' => is_writable(\App\Dictionary::CACHE_PATH)
+        'condition' => is_writable(Dictionary::CACHE_PATH)
     ],
     [
         'name' => 'Файл конфига',
         'description' => 'Для хранения настроек',
-        'condition' => is_writable(\App\Dictionary::CONFIG_PATH)
+        'condition' => is_writable(Dictionary::CONFIG_PATH)
     ],
     [
         'name' => 'PWA GROUP API',
         'description' => 'Для доступа к PWA GROUP',
-        'condition' => strlen($config['api']) > 0
+        'condition' => strlen(Dictionary::config()->get('api')) > 0
     ],
     [
         'name' => 'Telegram Bot API',
         'description' => 'Для доступа к боту',
-        'condition' => strlen($config['bot']) > 0
+        'condition' => strlen(Dictionary::config()->get('bot')) > 0
     ],
     [
         'name' => 'Webhook Telegram',
@@ -77,7 +83,7 @@ $requirements = [
     [
         'name' => '3 банера',
         'description' => 'Красивый бот будет',
-        'condition' => $config['banner'] && $config['fbpb'] && $config['pwab']
+        'condition' => Dictionary::config()->get('banner') && Dictionary::config()->get('fbpb') && Dictionary::config()->get('pwab')
     ]
 ];
 $conformity = 0;
@@ -163,7 +169,7 @@ $conformityClass = $conformity === count($requirements) ? 'success' : 'warning'
                             <div class="input-group has-validation">
                                 <input type="text" class="form-control" id="api" placeholder="hx2xzLYxxfKnxqxE" required
                                        name="api"
-                                       value="<?= $config['api'] ?>">
+                                       value="<?= Dictionary::config()->get('api') ?>">
                                 <div class="invalid-feedback">
                                     Заполните API ключ PWA GROUP
                                 </div>
@@ -176,7 +182,7 @@ $conformityClass = $conformity === count($requirements) ? 'success' : 'warning'
                                 <input type="text" class="form-control" id="bot"
                                        placeholder="1426535579:DUx569QpX2AUItjdAFK5T2YwSs-LFdjEXAw" required
                                        name="bot"
-                                       value="<?= $config['bot'] ?>">
+                                       value="<?= Dictionary::config()->get('bot') ?>">
                                 <div class="invalid-feedback">
                                     Заполните Telegram Bot API
                                 </div>
@@ -186,13 +192,13 @@ $conformityClass = $conformity === count($requirements) ? 'success' : 'warning'
                     </div>
                     <div class="row g-3">
                         <?php foreach ($files as $file => $label) : ?>
-                            <?php if ($config[$file]) {
-                                $type = pathinfo($config[$file], PATHINFO_EXTENSION);
-                                $data = file_get_contents($config[$file]);
+                            <?php if (Dictionary::config()->get($file)) {
+                                $type = pathinfo(Dictionary::config()->get($file), PATHINFO_EXTENSION);
+                                $data = file_get_contents(Dictionary::config()->get($file));
                                 $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
                                 echo "<div class='col-6'><img src='{$base64}' class='img-fluid rounded mx-auto d-block'></div>";
                             } ?>
-                            <div class="<?= ($config[$file] ? 'col-6' : 'col-12') ?>">
+                            <div class="<?= (Dictionary::config()->get($file) ? 'col-6' : 'col-12') ?>">
                                 <label for="<?= $file ?>" class="form-label text-white"><?= $label ?></label>
                                 <input class="form-control" type="file" id="<?= $file ?>" name="<?= $file ?>">
                                 <small class="text-muted">Если оставить пустым старый баннер не удалится</small>
