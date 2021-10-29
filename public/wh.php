@@ -1,5 +1,11 @@
 <?php
+
+use App\API;
+use App\Dictionary;
+
 require_once('..' . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php');
+Dictionary::config()->init();
+API::PWAGroup()->setKey(Dictionary::config()->get('api'));
 $router = new \App\Router([
     new \App\Route('📱 PWA', [\App\Controllers\PWAs::class, 'index']),
     new \App\Route('pwas/fbps', [\App\Controllers\FBPixel::class, 'pwas']),
@@ -30,10 +36,8 @@ function handler(int $id, \TelegramBot\Api\Client $bot, \App\Router $router, str
     }
 }
 
-$config = require_once \App\Dictionary::CONFIG_PATH;
-\App\API::PWAGroup()->setKey($config['api']);
 try {
-    $bot = new \TelegramBot\Api\Client($config['bot']);
+    $bot = new \TelegramBot\Api\Client(Dictionary::config()->get('bot'));
     //Handle /ping command
     $bot->command('start', function ($message) use ($bot, $router) {
         $id = $message->getChat()->getId();

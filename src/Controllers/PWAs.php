@@ -23,7 +23,7 @@ class PWAs
         $keyboard = $buttons === null ? null : new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup($buttons);
         $bot->sendPhoto(
             $id,
-            new \CURLFile(Dictionary::PWAB),
+            new \CURLFile(Dictionary::config()->get('pwab')),
             "Список ваших 📱PWA.\nДля получения 🔗ссылки нажмите на кнопку <b>\"Получить 🔗ссылку\"</b> в списка 📱PWA.\nДля 👀 предпросмотра нажмите на названия 📱PWA.",
             null,
             $keyboard,
