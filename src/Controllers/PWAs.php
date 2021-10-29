@@ -6,6 +6,7 @@ use App\API;
 use App\Dictionary;
 use App\Templates\Keyboard;
 use TelegramBot\Api\Client;
+use TelegramBot\Api\Types\Message;
 
 class PWAs
 {
@@ -21,7 +22,8 @@ class PWAs
             ];
         }
         $keyboard = $buttons === null ? null : new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup($buttons);
-        $bot->sendPhoto(
+        /** @var Message $message */
+        $message = $bot->sendPhoto(
             $id,
             new \CURLFile(Dictionary::config()->get('pwab')),
             "Список ваших 📱PWA.\nДля получения 🔗ссылки нажмите на кнопку <b>\"Получить 🔗ссылку\"</b> в списка 📱PWA.\nДля 👀 предпросмотра нажмите на названия 📱PWA.",
@@ -30,11 +32,20 @@ class PWAs
             false,
             'html',
         );
+        $_SERVER['messageId'] = $message->getMessageId();
     }
 
     public function view(int $id, Client $bot, string $pwaId): void
     {
         $pwa = API::PWAGroup()->getPWA($pwaId);
-        $bot->sendMessage($id, 'https://' . $pwa->getDomain() . '/', null, false, null, new Keyboard());
+        /** @var Message $message */
+        $message = $bot->sendPhoto(
+            $id,
+            new \CURLFile(Dictionary::config()->get('pwab')),
+            'https://' . $pwa->getDomain() . '/',
+            null,
+            new Keyboard()
+        );
+        $_SERVER['messageId'] = $message->getMessageId();
     }
 }

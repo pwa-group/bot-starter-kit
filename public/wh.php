@@ -41,10 +41,14 @@ try {
     //Handle /ping command
     $bot->command('start', function ($message) use ($bot, $router) {
         $id = $message->getChat()->getId();
+        session_id($id);
+        session_start();
         handler($id, $bot, $router);
     });
     $bot->callbackQuery(function (\TelegramBot\Api\Types\CallbackQuery $callbackQuery) use ($bot, $router) {
         $id = $callbackQuery->getFrom()->getId();
+        session_id($id);
+        session_start();
         $data = $callbackQuery->getData();
         handler($id, $bot, $router, $data);
     });
@@ -56,7 +60,7 @@ try {
         session_start();
         if (isset($_SESSION['pwaId'])) {
             $pwaId = $_SESSION['pwaId'];
-            session_destroy();
+            unset($_SESSION['pwaId']);
             $FBPixel = new \App\Controllers\FBPixel;
             $FBPixel->save($message->getText(), $pwaId);
             $FBPixel->index($id, $bot, $pwaId);

@@ -6,6 +6,7 @@ use App\API;
 use App\Dictionary;
 use PWAGroup\Models\FBP;
 use TelegramBot\Api\Client;
+use TelegramBot\Api\Types\Message;
 
 class FBPixel
 {
@@ -19,7 +20,8 @@ class FBPixel
             ];
         }
         $keyboard = $buttons === null ? null : new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup($buttons);
-        $bot->sendPhoto(
+        /** @var Message $message */
+        $message = $bot->sendPhoto(
             $id,
             new \CURLFile(Dictionary::config()->get('pwab')),
             "Список ваших 📱PWA.\nДля редактирования 🛠 Facebook Pixel'лей нажмите на названия 📱PWA",
@@ -28,6 +30,7 @@ class FBPixel
             false,
             'html',
         );
+        $_SERVER['messageId'] = $message->getMessageId();
     }
 
     public function index(int $id, Client $bot, string $pwaId): void
@@ -45,7 +48,8 @@ class FBPixel
             ];
         }
         $keyboard = $buttons === null ? null : new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup($buttons);
-        $bot->sendPhoto(
+        /** @var Message $message */
+        $message = $bot->sendPhoto(
             $id,
             new \CURLFile(Dictionary::config()->get('fbpb')),
             "📱PWA {$pwa->getAlias()}.\nСписок ваших 🛠 Facebook Pixel'лей.\nДля добавления пикселя воспользуйтесь кнопкой добавить.\nЧто бы изменить события которое считать лидом нажмите на кнопку лид или рега\nДля удаления пикселя нажмите на кнопку удалить",
@@ -54,14 +58,14 @@ class FBPixel
             false,
             'html',
         );
+        $_SERVER['messageId'] = $message->getMessageId();
     }
 
     public function create(int $id, Client $bot, string $pwaId): void
     {
-        session_id($id);
-        session_start();
         $_SESSION['pwaId'] = $pwaId;
-        $bot->sendPhoto(
+        /** @var Message $message */
+        $message = $bot->sendPhoto(
             $id,
             new \CURLFile(Dictionary::config()->get('fbpb')),
             "Добавте пиксеи построчно в формате <b>pixel:lead</b>, где <b>pixel</b> - это ваши FB pixel'ли, а <b>lead</b> - события лида которое может принимать занчения <b>install</b> или <b>registration</b>",
@@ -70,6 +74,7 @@ class FBPixel
             false,
             'html',
         );
+        $_SERVER['messageId'] = $message->getMessageId();
     }
 
     public function save(string $text, string $pwaId)
