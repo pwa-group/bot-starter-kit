@@ -11,13 +11,15 @@
   ],
   "autoload": {
     "psr-4": {
-      "Bot\\": "src/"
+      "App\\": "src/"
     }
   },
   "minimum-stability": "dev",
   "require": {
     "php": ">=8.0.0",
-    "pwa-group/php-sdk": "dev-master"
+    "pwa-group/php-sdk": "dev-master",
+    "telegram-bot/api": "v2.3.22",
+    "ext-curl": "*"
   },
   "repositories": [
     {

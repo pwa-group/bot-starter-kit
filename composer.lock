@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7eaea8f26fc47dc6a9b48d9223296609",
+    "content-hash": "55d468c06bf2425fca4396985ec62041",
     "packages": [
         {
             "name": "guzzlehttp/guzzle",
@@ -501,12 +501,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/pwa-group/php-sdk.git",
-                "reference": "45b130d39fadc82324f2ea828d21336acbee58d9"
+                "reference": "37f3b2bab0f58b10f9428a5bdda59f887ab01a5a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pwa-group/php-sdk/zipball/45b130d39fadc82324f2ea828d21336acbee58d9",
-                "reference": "45b130d39fadc82324f2ea828d21336acbee58d9",
+                "url": "https://api.github.com/repos/pwa-group/php-sdk/zipball/37f3b2bab0f58b10f9428a5bdda59f887ab01a5a",
+                "reference": "37f3b2bab0f58b10f9428a5bdda59f887ab01a5a",
                 "shasum": ""
             },
             "require": {
@@ -534,7 +534,7 @@
                 "source": "https://github.com/pwa-group/php-sdk/tree/master",
                 "issues": "https://github.com/pwa-group/php-sdk/issues"
             },
-            "time": "2021-10-25T21:35:57+00:00"
+            "time": "2021-10-28T13:37:05+00:00"
         },
         {
             "name": "ralouphie/getallheaders",
@@ -646,6 +646,66 @@
                 }
             ],
             "time": "2021-07-12T14:48:14+00:00"
+        },
+        {
+            "name": "telegram-bot/api",
+            "version": "v2.3.22",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/TelegramBot/Api.git",
+                "reference": "9a69f82121a5ef0e396c0c3a8be86caefd1376a8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/TelegramBot/Api/zipball/9a69f82121a5ef0e396c0c3a8be86caefd1376a8",
+                "reference": "9a69f82121a5ef0e396c0c3a8be86caefd1376a8",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "php": ">=5.5.0"
+            },
+            "require-dev": {
+                "codeception/codeception": "*",
+                "phpunit/phpunit": "~4.0",
+                "squizlabs/php_codesniffer": "2.*"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "TelegramBot\\Api\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ilya Gusev",
+                    "email": "mail@igusev.ru",
+                    "homepage": "https://php-cat.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "PHP Wrapper for Telegram Bot API",
+            "homepage": "https://github.com/TelegramBot/Api",
+            "keywords": [
+                "bot",
+                "bot api",
+                "php",
+                "telegram"
+            ],
+            "support": {
+                "issues": "https://github.com/TelegramBot/Api/issues",
+                "source": "https://github.com/TelegramBot/Api/tree/v2.3.22"
+            },
+            "time": "2021-03-09T07:49:55+00:00"
         }
     ],
     "packages-dev": [],
@@ -657,7 +717,8 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=8.0.0"
+        "php": ">=8.0.0",
+        "ext-curl": "*"
     },
     "platform-dev": [],
     "plugin-api-version": "2.1.0"

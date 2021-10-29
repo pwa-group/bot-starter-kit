@@ -1,18 +1,30 @@
 <?php
 require_once('..' . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php');
-if (!file_exists(\Bot\Dictionary::CACHE_PATH)) {
-    mkdir(\Bot\Dictionary::CACHE_PATH);
+$webhookURL = 'https://' . $_SERVER['HTTP_HOST'] . '/wh.php';
+if (!file_exists(\App\Dictionary::CACHE_PATH)) {
+    mkdir(\App\Dictionary::CACHE_PATH);
 }
 $config = ['api' => '', 'bot' => ''];
-if (file_exists(\Bot\Dictionary::CONFIG_PATH)) {
-    $config = require_once \Bot\Dictionary::CONFIG_PATH;
+if (file_exists(\App\Dictionary::CONFIG_PATH)) {
+    $config = require_once \App\Dictionary::CONFIG_PATH;
     if (!empty($_POST)) {
         $config['api'] = $_POST['api'];
         $config['bot'] = $_POST['bot'];
-        file_put_contents(\Bot\Dictionary::CONFIG_PATH, '<?php return ' . var_export($config, true) . ';');
+        file_put_contents(\App\Dictionary::CONFIG_PATH, '<?php return ' . var_export($config, true) . ';');
+        $bot = new \TelegramBot\Api\BotApi($config['bot']);
+        try {
+            $bot->setWebhook($webhookURL);
+        } catch (\TelegramBot\Api\Exception $e) {
+        }
     }
 } else {
-    copy(\Bot\Dictionary::TEMPLATE_CONFIG_PATH, \Bot\Dictionary::CONFIG_PATH);
+    copy(\App\Dictionary::TEMPLATE_CONFIG_PATH, \App\Dictionary::CONFIG_PATH);
+}
+$bot = new \TelegramBot\Api\BotApi($config['bot']);
+try {
+    $botWebhookURL = $bot->getWebhookInfo()->getUrl();
+} catch (\TelegramBot\Api\Exception $e) {
+    $botWebhookURL = '';
 }
 $requirements = [
     [
@@ -23,12 +35,12 @@ $requirements = [
     [
         'name' => 'Доступ на запись',
         'description' => 'Необходимо для кеширования',
-        'condition' => is_writable(\Bot\Dictionary::CACHE_PATH)
+        'condition' => is_writable(\App\Dictionary::CACHE_PATH)
     ],
     [
         'name' => 'Файл конфига',
         'description' => 'Для хранения настроек',
-        'condition' => is_writable(\Bot\Dictionary::CONFIG_PATH)
+        'condition' => is_writable(\App\Dictionary::CONFIG_PATH)
     ],
     [
         'name' => 'PWA GROUP API',
@@ -39,6 +51,16 @@ $requirements = [
         'name' => 'Telegram Bot API',
         'description' => 'Для доступа к боту',
         'condition' => strlen($config['bot']) > 0
+    ],
+    [
+        'name' => 'Webhook Telegram',
+        'description' => 'Настройка бота',
+        'condition' => $botWebhookURL === $webhookURL
+    ],
+    [
+        'name' => 'Поддержка PHP cURL',
+        'description' => 'Для работы с файлами',
+        'condition' => class_exists('CURLFile')
     ]
 ];
 $conformity = 0;
