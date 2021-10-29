@@ -109,9 +109,9 @@ $conformityClass = $conformity === count($requirements) ? 'success' : 'warning'
             <h2>Установка telegram bot</h2>
             <p class="lead">С помощью этого скрипта вы быстро и удобно сможете настроить свой хостинг. Для начала вам
                 необходимо получить API ключ на платформе <a class="link-success" href="https://pwa.group">PWA GROUP</a>.
-                После этого создать бота в телеграме, для примера
+                После этого создать бота в telegram, для примера
                 воспользуйтесь этой <a class="link-success"
-                                       href="https://sendpulse.ua/ru/knowledge-base/chatbot/create-telegram-chatbot">инструкцией</a>.
+                                       href="https://github.com/pwa-group/bot-starter-kit/blob/master/README.md#Создание-telegram-бота">инструкцией</a>.
             </p>
         </div>
         <div class="row g-5">
@@ -163,7 +163,7 @@ $conformityClass = $conformity === count($requirements) ? 'success' : 'warning'
                                     Заполните Telegram Bot API
                                 </div>
                             </div>
-                            <small class="text-muted">Необходимо создать бота в телеграме</small>
+                            <small class="text-muted">Необходимо создать бота в telegram</small>
                         </div>
                     </div>
                     <hr class="my-4">
