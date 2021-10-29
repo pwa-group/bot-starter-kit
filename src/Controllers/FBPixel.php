@@ -21,7 +21,7 @@ class FBPixel
         $keyboard = $buttons === null ? null : new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup($buttons);
         $bot->sendPhoto(
             $id,
-            new \CURLFile(Dictionary::PWAB),
+            new \CURLFile(Dictionary::config()->get('pwab')),
             "Список ваших 📱PWA.\nДля редактирования 🛠 Facebook Pixel'лей нажмите на названия 📱PWA",
             null,
             $keyboard,
@@ -47,7 +47,7 @@ class FBPixel
         $keyboard = $buttons === null ? null : new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup($buttons);
         $bot->sendPhoto(
             $id,
-            new \CURLFile(Dictionary::FBPB),
+            new \CURLFile(Dictionary::config()->get('fbpb')),
             "📱PWA {$pwa->getAlias()}.\nСписок ваших 🛠 Facebook Pixel'лей.\nДля добавления пикселя воспользуйтесь кнопкой добавить.\nЧто бы изменить события которое считать лидом нажмите на кнопку лид или рега\nДля удаления пикселя нажмите на кнопку удалить",
             null,
             $keyboard,
@@ -63,7 +63,7 @@ class FBPixel
         $_SESSION['pwaId'] = $pwaId;
         $bot->sendPhoto(
             $id,
-            new \CURLFile(Dictionary::FBPB),
+            new \CURLFile(Dictionary::config()->get('fbpb')),
             "Добавте пиксеи построчно в формате <b>pixel:lead</b>, где <b>pixel</b> - это ваши FB pixel'ли, а <b>lead</b> - события лида которое может принимать занчения <b>install</b> или <b>registration</b>",
             null,
             null,
