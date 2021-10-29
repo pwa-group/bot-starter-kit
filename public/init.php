@@ -5,11 +5,23 @@ if (!file_exists(\App\Dictionary::CACHE_PATH)) {
     mkdir(\App\Dictionary::CACHE_PATH);
 }
 $config = ['api' => '', 'bot' => ''];
+$files = ['banner' => 'Основной баннер', 'fbpb' => 'Баннер для Facebook Pixel', 'pwab' => 'Баннер для PWA'];
 if (file_exists(\App\Dictionary::CONFIG_PATH)) {
     $config = require_once \App\Dictionary::CONFIG_PATH;
     if (!empty($_POST)) {
         $config['api'] = $_POST['api'];
         $config['bot'] = $_POST['bot'];
+        foreach ($files as $file => $label) {
+            if (isset($_FILES[$file]['tmp_name']) && $_FILES[$file]['tmp_name'] != '') {
+                $target_file = \App\Dictionary::CACHE_PATH . DIRECTORY_SEPARATOR . basename($_FILES[$file]['name']);
+                if (move_uploaded_file($_FILES[$file]['tmp_name'], $target_file)) {
+                    if (file_exists($config[$file])) {
+                        unlink($config[$file]);
+                    }
+                    $config[$file] = $target_file;
+                }
+            }
+        }
         file_put_contents(\App\Dictionary::CONFIG_PATH, '<?php return ' . var_export($config, true) . ';');
         $bot = new \TelegramBot\Api\BotApi($config['bot']);
         try {
@@ -61,6 +73,11 @@ $requirements = [
         'name' => 'Поддержка PHP cURL',
         'description' => 'Для работы с файлами',
         'condition' => class_exists('CURLFile')
+    ],
+    [
+        'name' => '3 банера',
+        'description' => 'Красивый бот будет',
+        'condition' => $config['banner'] && $config['fbpb'] && $config['pwab']
     ]
 ];
 $conformity = 0;
@@ -138,7 +155,8 @@ $conformityClass = $conformity === count($requirements) ? 'success' : 'warning'
             </div>
             <div class="col-md-7 col-lg-8">
                 <h4 class="mb-3 text-white">Форма конфига</h4>
-                <form class="needs-validation" novalidate method="post" action="/init.php">
+                <form class="needs-validation" novalidate method="post" action="/init.php"
+                      enctype="multipart/form-data">
                     <div class="row g-3">
                         <div class="col-12">
                             <label for="api" class="form-label text-white">API ключ PWA GROUP</label>
@@ -165,6 +183,21 @@ $conformityClass = $conformity === count($requirements) ? 'success' : 'warning'
                             </div>
                             <small class="text-muted">Необходимо создать бота в telegram</small>
                         </div>
+                    </div>
+                    <div class="row g-3">
+                        <?php foreach ($files as $file => $label) : ?>
+                            <?php if ($config[$file]) {
+                                $type = pathinfo($config[$file], PATHINFO_EXTENSION);
+                                $data = file_get_contents($config[$file]);
+                                $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+                                echo "<div class='col-6'><img src='{$base64}' class='img-fluid rounded mx-auto d-block'></div>";
+                            } ?>
+                            <div class="<?= ($config[$file] ? 'col-6' : 'col-12') ?>">
+                                <label for="<?= $file ?>" class="form-label text-white"><?= $label ?></label>
+                                <input class="form-control" type="file" id="<?= $file ?>" name="<?= $file ?>">
+                                <small class="text-muted">Если оставить пустым старый баннер не удалится</small>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
                     <hr class="my-4">
                     <button class="w-100 btn btn-success btn-lg" type="submit">Сохранить</button>
