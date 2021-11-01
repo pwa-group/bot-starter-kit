@@ -43,7 +43,7 @@ try {
         $id = $message->getChat()->getId();
         session_id($id);
         session_start();
-        handler($id, $bot, $router);
+        (new \App\Controllers\Index)($id, $bot, true);
     });
     $bot->callbackQuery(function (\TelegramBot\Api\Types\CallbackQuery $callbackQuery) use ($bot, $router) {
         $id = $callbackQuery->getFrom()->getId();
@@ -56,6 +56,7 @@ try {
     $bot->on(function (\TelegramBot\Api\Types\Update $update) use ($bot, $router) {
         $message = $update->getMessage();
         $id = $message->getChat()->getId();
+        $bot->deleteMessage($id, $message->getMessageId());
         session_id($id);
         session_start();
         if (isset($_SESSION['pwaId'])) {
@@ -81,7 +82,6 @@ try {
                     (new \App\Controllers\Index)($id, $bot);
                     break;
             }
-            $bot->deleteMessage($id, $message->getMessageId());
         }
     }, function () {
         return true;
