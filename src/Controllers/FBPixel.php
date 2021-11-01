@@ -4,8 +4,10 @@ namespace App\Controllers;
 
 use App\API;
 use App\Dictionary;
+use App\Viewer;
 use PWAGroup\Models\FBP;
 use TelegramBot\Api\Client;
+use TelegramBot\Api\Types\Inline\InlineKeyboardMarkup;
 
 class FBPixel
 {
@@ -14,62 +16,54 @@ class FBPixel
         $pwas = API::PWAGroup()->getPWAs($id);
         $buttons = null;
         foreach ($pwas as $pwa) {
+            $locales = empty($pwa->getLocales()) ? '' : '[' . implode(', ', $pwa->getLocales()) . ']';
             $buttons[] = [
-                ['text' => "🛠 {$pwa->getAlias()}", 'callback_data' => "pwas/{$pwa->getID()}/fbps"],
+                ['text' => "🛠 {$locales} {$pwa->getAlias()} {$pwa->getDomain()}", 'callback_data' => "pwas/{$pwa->getID()}/fbps"],
             ];
         }
-        $keyboard = $buttons === null ? null : new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup($buttons);
-        $bot->sendPhoto(
+        $caption = "Список ваших 📱PWA.\nДля редактирования 🛠 Facebook Pixel'лей нажмите на названия 📱PWA";
+        $inlineKeyboardMarkup = $buttons === null ? null : new InlineKeyboardMarkup($buttons);
+        Viewer::view(
             $id,
-            new \CURLFile(Dictionary::config()->get('pwab')),
-            "Список ваших 📱PWA.\nДля редактирования 🛠 Facebook Pixel'лей нажмите на названия 📱PWA",
-            null,
-            $keyboard,
-            false,
-            'html',
-        );
+            $bot,
+            Dictionary::config()->get('pwab'),
+            $caption,
+            $inlineKeyboardMarkup);
     }
 
     public function index(int $id, Client $bot, string $pwaId): void
     {
         $pwa = API::PWAGroup()->getPWA($pwaId);
         $buttons[] = [
-            ['text' => 'Назад', 'callback_data' => "pwas/fbps"],
-            ['text' => 'Добавить', 'callback_data' => "pwas/{$pwa->getID()}/fbps/add"],
+            ['text' => '🔙Назад', 'callback_data' => "pwas/fbps"],
+            ['text' => '➕Добавить', 'callback_data' => "pwas/{$pwa->getID()}/fbps/add"],
         ];
         foreach ($pwa->getFBPs() as $FBP) {
             $buttons[] = [
                 ['text' => '🔗' . substr($FBP->getID(), 0, 4) . '...' . substr($FBP->getID(), strlen($FBP->getID()) - 4, 4) . ':' . ($FBP->getLead() === 'install' ? 'уст' : 'рег'), 'url' => "https://{$pwa->getDomain()}/?fbp={$FBP->getID()}"],
-                ['text' => "На " . ($FBP->getLead() === 'install' ? 'регистрацию' : 'установку'), 'callback_data' => "pwas/{$pwa->getID()}/fbps/{$FBP->getID()}/" . ($FBP->getLead() === 'install' ? 'registration' : 'install')],
-                ['text' => 'Удалить', 'callback_data' => "pwas/{$pwa->getID()}/fbps/{$FBP->getID()}/delete"]
+                ['text' => "На " . ($FBP->getLead() === 'install' ? '📝регистра' : '⤵установку'), 'callback_data' => "pwas/{$pwa->getID()}/fbps/{$FBP->getID()}/" . ($FBP->getLead() === 'install' ? 'registration' : 'install')],
+                ['text' => '🗑Удалить', 'callback_data' => "pwas/{$pwa->getID()}/fbps/{$FBP->getID()}/delete"]
             ];
         }
-        $keyboard = $buttons === null ? null : new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup($buttons);
-        $bot->sendPhoto(
+        $inlineKeyboardMarkup = $buttons === null ? null : new InlineKeyboardMarkup($buttons);
+        $caption = "📱PWA {$pwa->getAlias()}.\nСписок ваших 🛠 Facebook Pixel'лей.\nДля добавления пикселя воспользуйтесь кнопкой <b>➕Добавить</b>.\nЧто бы изменить события которое считать лидом нажмите на кнопку лид или рега\nДля удаления пикселя нажмите на кнопку 🗑удалить";
+        Viewer::view(
             $id,
-            new \CURLFile(Dictionary::config()->get('fbpb')),
-            "📱PWA {$pwa->getAlias()}.\nСписок ваших 🛠 Facebook Pixel'лей.\nДля добавления пикселя воспользуйтесь кнопкой добавить.\nЧто бы изменить события которое считать лидом нажмите на кнопку лид или рега\nДля удаления пикселя нажмите на кнопку удалить",
-            null,
-            $keyboard,
-            false,
-            'html',
-        );
+            $bot,
+            Dictionary::config()->get('fbpb'),
+            $caption,
+            $inlineKeyboardMarkup);
     }
 
     public function create(int $id, Client $bot, string $pwaId): void
     {
-        session_id($id);
-        session_start();
         $_SESSION['pwaId'] = $pwaId;
-        $bot->sendPhoto(
+        $caption = "Добавте пиксеи построчно в формате <b>pixel:lead</b>, где <b>pixel</b> - это ваши FB pixel'ли, а <b>lead</b> - события лида которое может принимать занчения <b>install</b> или <b>registration</b>";
+        Viewer::view(
             $id,
-            new \CURLFile(Dictionary::config()->get('fbpb')),
-            "Добавте пиксеи построчно в формате <b>pixel:lead</b>, где <b>pixel</b> - это ваши FB pixel'ли, а <b>lead</b> - события лида которое может принимать занчения <b>install</b> или <b>registration</b>",
-            null,
-            null,
-            false,
-            'html',
-        );
+            $bot,
+            Dictionary::config()->get('fbpb'),
+            $caption);
     }
 
     public function save(string $text, string $pwaId)

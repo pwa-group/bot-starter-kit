@@ -17,7 +17,7 @@ if (file_exists(Dictionary::CONFIG_PATH)) {
         Dictionary::config()->set($_POST['bot'], 'bot');
         foreach ($files as $file => $label) {
             if (isset($_FILES[$file]['tmp_name']) && $_FILES[$file]['tmp_name'] != '') {
-                $target_file = Dictionary::CACHE_PATH . DIRECTORY_SEPARATOR . basename($_FILES[$file]['name']);
+                $target_file = __DIR__ . DIRECTORY_SEPARATOR . basename($_FILES[$file]['name']);
                 if (move_uploaded_file($_FILES[$file]['tmp_name'], $target_file)) {
                     if (file_exists(Dictionary::config()->get($file))) {
                         unlink(Dictionary::config()->get($file));
