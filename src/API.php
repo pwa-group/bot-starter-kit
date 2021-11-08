@@ -2,6 +2,10 @@
 
 namespace App;
 
+use PWAGroup\Auth;
+use PWAGroup\Models\PWA;
+use PWAGroup\PWAs\Pages;
+
 class API
 {
     private static $instances = [];
@@ -41,37 +45,37 @@ class API
 
     public function setKey(string $key)
     {
-        if (file_exists(\App\Dictionary::AUTH_PATH) && filemtime(\App\Dictionary::AUTH_PATH) >= (time() - 60 * 60)) {
-            $this->auth = unserialize(file_get_contents(\App\Dictionary::AUTH_PATH));
+        if (file_exists(Dictionary::AUTH_PATH) && filemtime(Dictionary::AUTH_PATH) >= (time() - 60 * 60)) {
+            $this->auth = unserialize(file_get_contents(Dictionary::AUTH_PATH));
         } else {
-            $this->auth = new \PWAGroup\Auth($key);
-            file_put_contents(\App\Dictionary::AUTH_PATH, serialize($this->auth), LOCK_EX);
+            $this->auth = new Auth($key);
+            file_put_contents(Dictionary::AUTH_PATH, serialize($this->auth), LOCK_EX);
         }
     }
 
-    private \PWAGroup\Auth $auth;
+    private Auth $auth;
 
     /**
-     * @return \PWAGroup\Models\PWA[]
+     * @return PWA[]
      */
     public function getPWAs($id): array
     {
-        $pages = new \PWAGroup\PWAs\Pages($this->auth, 5);
-        $pages->setFilter('status', \PWAGroup\Models\PWA::STATUS_RUN);
+        $pages = new Pages($this->auth, 5);
+        $pages->setFilter('status', PWA::STATUS_RUN);
         $pages->setFilter('tags', $id);
         return $pages->getPage();
     }
 
-    public function savePWA(\PWAGroup\Models\PWA $pwa)
+    public function savePWA(PWA $pwa)
     {
         $PWA = new \PWAGroup\PWAs\PWA($this->auth);
         $PWA->update($pwa);
     }
 
     /**
-     * @return \PWAGroup\Models\PWA
+     * @return PWA
      */
-    public function getPWA($id): \PWAGroup\Models\PWA
+    public function getPWA($id): PWA
     {
         $PWA = new \PWAGroup\PWAs\PWA($this->auth);
         return $PWA->read($id);

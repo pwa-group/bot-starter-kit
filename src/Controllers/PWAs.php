@@ -4,12 +4,8 @@ namespace App\Controllers;
 
 use App\API;
 use App\Dictionary;
-use App\Logger;
-use App\Templates\Keyboard;
 use App\Viewer;
 use TelegramBot\Api\Client;
-use TelegramBot\Api\Types\InputMedia\InputMediaPhoto;
-use TelegramBot\Api\Types\Message;
 
 class PWAs
 {
