@@ -13,8 +13,8 @@ $files = ['banner' => 'Основной баннер', 'fbpb' => 'Баннер �
 if (file_exists(Dictionary::CONFIG_PATH)) {
     Dictionary::config()->init();
     if (!empty($_POST)) {
-        Dictionary::config()->set($_POST['api'], 'api');
-        Dictionary::config()->set($_POST['bot'], 'bot');
+        Dictionary::config()->set('api', $_POST['api']);
+        Dictionary::config()->set('bot', $_POST['bot']);
         foreach ($files as $file => $label) {
             if (isset($_FILES[$file]['tmp_name']) && $_FILES[$file]['tmp_name'] != '') {
                 $target_file = __DIR__ . DIRECTORY_SEPARATOR . basename($_FILES[$file]['name']);
