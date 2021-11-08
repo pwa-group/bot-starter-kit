@@ -8,7 +8,7 @@ $webhookURL = 'https://' . $_SERVER['HTTP_HOST'] . '/wh.php';
 if (!file_exists(Dictionary::CACHE_PATH)) {
     mkdir(Dictionary::CACHE_PATH);
 }
-Dictionary::config()->set(['api' => '', 'bot' => '']);
+Dictionary::config()->set(['api' => '', 'bot' => '', 'banner' => '', 'fbpb' => '', 'pwab' => '']);
 $files = ['banner' => 'Основной баннер', 'fbpb' => 'Баннер для Facebook Pixel', 'pwab' => 'Баннер для PWA'];
 if (file_exists(Dictionary::CONFIG_PATH)) {
     Dictionary::config()->init();
