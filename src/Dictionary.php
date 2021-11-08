@@ -65,7 +65,7 @@ class Dictionary
 
     public function save(): void
     {
-        file_put_contents(\App\Dictionary::CONFIG_PATH, '<?php return ' . var_export($this->config, true) . ';');
+        file_put_contents(Dictionary::CONFIG_PATH, '<?php return ' . var_export($this->config, true) . ';');
     }
 
     private array $config;

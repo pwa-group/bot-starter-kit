@@ -1,22 +1,33 @@
 <?php
 
 use App\API;
+use App\Controllers\FBPixel;
+use App\Controllers\Index;
+use App\Controllers\Profile;
+use App\Controllers\PWAs;
 use App\Dictionary;
+use App\Logger;
+use App\Route;
+use App\Router;
+use App\StringHelpers;
+use TelegramBot\Api\Client;
+use TelegramBot\Api\Types\CallbackQuery;
+use TelegramBot\Api\Types\Update;
 
 require_once('..' . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php');
 Dictionary::config()->init();
 API::PWAGroup()->setKey(Dictionary::config()->get('api'));
-$router = new \App\Router([
-    new \App\Route('📱 PWA', [\App\Controllers\PWAs::class, 'index']),
-    new \App\Route('pwas/fbps', [\App\Controllers\FBPixel::class, 'pwas']),
-    new \App\Route('pwas/{pwaId}', [\App\Controllers\PWAs::class, 'view']),
-    new \App\Route('pwas/{pwaId}/fbps', [\App\Controllers\FBPixel::class, 'index']),
-    new \App\Route('pwas/{pwaId}/fbps/add', [\App\Controllers\FBPixel::class, 'create']),
-    new \App\Route('pwas/{pwaId}/fbps/{fbp}/delete', [\App\Controllers\FBPixel::class, 'delete']),
-    new \App\Route('pwas/{pwaId}/fbps/{fbp}/install', [\App\Controllers\FBPixel::class, 'install']),
-    new \App\Route('pwas/{pwaId}/fbps/{fbp}/registration', [\App\Controllers\FBPixel::class, 'registration']),
+$router = new Router([
+    new Route('📱 PWA', [PWAs::class, 'index']),
+    new Route('pwas/fbps', [FBPixel::class, 'pwas']),
+    new Route('pwas/{pwaId}', [PWAs::class, 'view']),
+    new Route('pwas/{pwaId}/fbps', [FBPixel::class, 'index']),
+    new Route('pwas/{pwaId}/fbps/add', [FBPixel::class, 'create']),
+    new Route('pwas/{pwaId}/fbps/{fbp}/delete', [FBPixel::class, 'delete']),
+    new Route('pwas/{pwaId}/fbps/{fbp}/install', [FBPixel::class, 'install']),
+    new Route('pwas/{pwaId}/fbps/{fbp}/registration', [FBPixel::class, 'registration']),
 ]);
-function handler(int $id, \TelegramBot\Api\Client $bot, \App\Router $router, string $data = '/')
+function handler(int $id, Client $bot, Router $router, string $data = '/')
 {
     $route = $router->matchFromPath($data);
     $parameters = $route->getParameters();
@@ -31,50 +42,54 @@ function handler(int $id, \TelegramBot\Api\Client $bot, \App\Router $router, str
     }
     try {
         $controller(...array_values($arguments));
-    } catch (\Error $e) {
-        \App\Logger::telegram(var_export($e, true));
+    } catch (Error $e) {
+        Logger::telegram(var_export($e, true));
     }
 }
 
 try {
-    $bot = new \TelegramBot\Api\Client(Dictionary::config()->get('bot'));
-    //Handle /ping command
+    $bot = new Client(Dictionary::config()->get('bot'));
     $bot->command('start', function ($message) use ($bot, $router) {
         $id = $message->getChat()->getId();
-        handler($id, $bot, $router);
+        session_id($id);
+        session_start();
+        (new Index)($id, $bot, true);
     });
-    $bot->callbackQuery(function (\TelegramBot\Api\Types\CallbackQuery $callbackQuery) use ($bot, $router) {
+    $bot->callbackQuery(function (CallbackQuery $callbackQuery) use ($bot, $router) {
         $id = $callbackQuery->getFrom()->getId();
+        session_id($id);
+        session_start();
         $data = $callbackQuery->getData();
         handler($id, $bot, $router, $data);
     });
     //Handle text messages
-    $bot->on(function (\TelegramBot\Api\Types\Update $update) use ($bot, $router) {
+    $bot->on(function (Update $update) use ($bot, $router) {
         $message = $update->getMessage();
         $id = $message->getChat()->getId();
+        $bot->deleteMessage($id, $message->getMessageId());
         session_id($id);
         session_start();
         if (isset($_SESSION['pwaId'])) {
             $pwaId = $_SESSION['pwaId'];
-            session_destroy();
-            $FBPixel = new \App\Controllers\FBPixel;
+            unset($_SESSION['pwaId']);
+            $FBPixel = new FBPixel;
             $FBPixel->save($message->getText(), $pwaId);
             $FBPixel->index($id, $bot, $pwaId);
         } else {
-            $text = \App\StringHelpers::removeEmoji($message->getText());
+            $text = StringHelpers::removeEmoji($message->getText());
             $text = trim($text);
             switch ($text) {
                 case 'Мой 🆔':
-                    (new \App\Controllers\Profile)($id, $bot);
+                    (new Profile)($id, $bot);
                     break;
                 case 'PWA прилы':
-                    (new \App\Controllers\PWAs)->index($id, $bot);
+                    (new PWAs)->index($id, $bot);
                     break;
                 case 'Facebook Pixel':
-                    (new \App\Controllers\FBPixel)->pwas($id, $bot);
+                    (new FBPixel)->pwas($id, $bot);
                     break;
                 default:
-                    (new \App\Controllers\Index)($id, $bot);
+                    (new Index)($id, $bot);
                     break;
             }
         }
