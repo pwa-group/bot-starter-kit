@@ -4,7 +4,7 @@ namespace App;
 
 class Pagination
 {
-    const LIMIT = 2;
+    const LIMIT = 5;
 
     public function __construct(
         private int   $currentPage = 1,
