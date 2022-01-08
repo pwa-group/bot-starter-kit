@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\API;
 use App\Dictionary;
+use App\Pagination;
 use App\Viewer;
 use PWAGroup\Models\FBP;
 use TelegramBot\Api\Client;
@@ -31,22 +32,27 @@ class FBPixel
             $inlineKeyboardMarkup);
     }
 
-    public function index(int $id, Client $bot, string $pwaId): void
+    public function index(int $id, Client $bot, string $pwaId, int $currentPage = 1): void
     {
         $pwa = API::PWAGroup()->getPWA($pwaId);
         $buttons[] = [
             ['text' => '🔙Назад', 'callback_data' => "pwas/fbps"],
             ['text' => '➕Добавить', 'callback_data' => "pwas/{$pwa->getID()}/fbps/add"],
         ];
-        foreach ($pwa->getFBPs() as $FBP) {
+        $pagination = new Pagination($currentPage, $pwa->getFBPs());
+        foreach ($pagination->getModels() as $FBP) {
             $buttons[] = [
                 ['text' => '🔗' . substr($FBP->getID(), 0, 4) . '...' . substr($FBP->getID(), strlen($FBP->getID()) - 4, 4) . ':' . ($FBP->getLead() === 'install' ? 'уст' : 'рег'), 'url' => "https://{$pwa->getDomain()}/?fbp={$FBP->getID()}"],
                 ['text' => "На " . ($FBP->getLead() === 'install' ? '📝регистра' : '⤵установку'), 'callback_data' => "pwas/{$pwa->getID()}/fbps/{$FBP->getID()}/" . ($FBP->getLead() === 'install' ? 'registration' : 'install')],
                 ['text' => '🗑Удалить', 'callback_data' => "pwas/{$pwa->getID()}/fbps/{$FBP->getID()}/delete"]
             ];
         }
+        $paginationButtons = $pagination->getButtons("pwas/{$pwa->getID()}/fbps");
+        if ($paginationButtons) {
+            $buttons[] = $paginationButtons;
+        }
         $inlineKeyboardMarkup = $buttons === null ? null : new InlineKeyboardMarkup($buttons);
-        $caption = "📱PWA {$pwa->getAlias()}.\nСписок ваших 🛠 Facebook Pixel'лей.\nДля добавления пикселя воспользуйтесь кнопкой <b>➕Добавить</b>.\nЧто бы изменить события которое считать лидом нажмите на кнопку лид или рега\nДля удаления пикселя нажмите на кнопку 🗑удалить";
+        $caption = "📱PWA {$pwa->getAlias()}.\nСписок ваших 🛠 Facebook Pixel'лей.\nДля добавления пикселя воспользуйтесь кнопкой <b>➕Добавить</b>.\nЧто бы изменить события которое считать лидом нажмите на кнопку лид или рега\nДля удаления пикселя нажмите на кнопку 🗑удалить" . $pagination->getCaption();
         Viewer::view(
             $id,
             $bot,
