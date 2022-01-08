@@ -23,6 +23,7 @@ $router = new Router([
     new Route('pwas/{pwaId}', [PWAs::class, 'view']),
     new Route('pwas/{pwaId}/fbps', [FBPixel::class, 'index']),
     new Route('pwas/{pwaId}/fbps/add', [FBPixel::class, 'create']),
+    new Route('pwas/{pwaId}/fbps/{page}', [FBPixel::class, 'index']),
     new Route('pwas/{pwaId}/fbps/{fbp}/delete', [FBPixel::class, 'delete']),
     new Route('pwas/{pwaId}/fbps/{fbp}/install', [FBPixel::class, 'install']),
     new Route('pwas/{pwaId}/fbps/{fbp}/registration', [FBPixel::class, 'registration']),

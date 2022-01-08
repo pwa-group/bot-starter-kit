@@ -28,4 +28,10 @@ class StringHelpers
 
         return $clear_string;
     }
+
+    public static function plural($number, $titles = [/*1*/ 'запись', /*2*/ 'записи', /*5*/ 'записей'])
+    {
+        $cases = [2, 0, 1, 1, 1, 2];
+        return $number . ' ' . $titles[($number % 100 > 4 && $number % 100 < 20) ? 2 : $cases[min($number % 10, 5)]];
+    }
 }
